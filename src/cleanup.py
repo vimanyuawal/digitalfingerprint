@@ -6,8 +6,7 @@ import string
 import re
 
 
-def cleanUp():
-    docs_path = './data/Docs_txt'
+def cleanUp(docs_path):
     for filename in os.listdir(docs_path):
         file = open(docs_path+'/'+filename, 'r+')
         text = file.read()
@@ -18,4 +17,5 @@ def cleanUp():
         file.close()
 
 
-cleanUp()
+cleanUp('./data/Docs_txt')
+cleanUp('./data/Templates_txt')

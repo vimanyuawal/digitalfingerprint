@@ -44,6 +44,13 @@ def createFolders():
     else:
         print('The Unreadable folder already exists.')
 
+    newpath = r'./data/Templates_txt'
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+        print('Templates_txt folder created...')
+    else:
+        print('The Templates_txt folder already exists.')
+
 
 def readFilesToText():
     print('Accessing files from data/Docs...')
@@ -125,6 +132,21 @@ def readFilesToText():
     filelist = [f for f in os.listdir(unread_path) if f.endswith(".jpg")]
     for f in filelist:
         os.remove(unread_path+'/'+f)
+
+    template_path = './data/Templates/'
+    save_path = './data/Templates_txt/'
+    counter = 1
+    for file in os.listdir(template_path):
+        data = parser.from_file(template_path+file)
+        text = data['content']
+        if text != None:
+            textFile = open((save_path+str(counter)+'.txt'), 'w')
+            textFile.write(text)
+            textFile.close()
+            # moving to read folder
+            shutil.copyfile(template_path+file, read_path+'/'+file)
+            print('Added file.')
+            counter += 1
 
 
 createFolders()
