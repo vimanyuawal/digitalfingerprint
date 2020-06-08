@@ -94,14 +94,14 @@ class Fingerprint(object):
                    for i in range(len(self.hashes) - self.window_len + 1)]
 
         cur_min_hash, cur_min_pos = self.get_min_with_pos(windows[0])
-        self.fingerprints.append((cur_min_hash, cur_min_pos))
+        self.fingerprints.append((cur_min_hash, 0))
 
         for i, window in enumerate(windows[1:]):
             min_hash, min_pos = self.get_min_with_pos(window)
             min_pos += i + 1
             if min_hash != cur_min_hash or min_hash == cur_min_hash and min_pos > cur_min_pos:
                 cur_min_hash, cur_min_pos = min_hash, min_pos
-                self.fingerprints.append((min_hash, min_pos))
+                self.fingerprints.append((min_hash, 0))
 
         # print('fingerprints: ', self.fingerprints)
 
@@ -171,14 +171,12 @@ def checkSimilarity(fingerprints, db):
 
 
 if __name__ == "__main__":
-    f = Fingerprint(kgram_len=4, window_len=9)
+    f = Fingerprint(kgram_len=5, window_len=9)
     db = Database()
     saveTemplatesToDatabase(f, db)
-    filepath = './data/Docs_txt/'
-    print(db.printDB())
-    # for file in os.listdir(filepath):
-    #     filefingerprints = f.generate(fpath=filepath+file)
-    #     checkSimilarity(filefingerprints, db)
+    filepath = './data/Docs_txt/3.txt'
+    filefingerprints = f.generate(fpath=filepath)
+    checkSimilarity(filefingerprints, db)
 
 
 # does positioning matter? maybe, maybe not

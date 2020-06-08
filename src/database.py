@@ -9,7 +9,12 @@ class Database:
             self.fingerprintToDoc[fingerprints] = [docpath]
 
     def getDocuments(self, fingerprints):
-        return self.fingerprintToDoc[fingerprints]
+        docs = []
+        for fp in fingerprints:
+            if fp in self.fingerprintToDoc:
+                docs.append(self.fingerprintToDoc[fp])
+
+        return docs
 
     def printDB(self):
         print(self.fingerprintToDoc)

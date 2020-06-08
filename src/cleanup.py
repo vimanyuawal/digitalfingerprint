@@ -13,9 +13,14 @@ def cleanUp(docs_path):
         file.truncate(0)
         text = ''.join(e for e in text if e.isalnum())
         text = text.lower()
-        file.write(text)
-        file.close()
+        text = text.strip('\x00')
+        text = text.replace('\x00', '')
+        if len(text) > 0:
+            file.write(text)
+            file.close()
+        else:
+            os.remove(str(docs_path+filename))
 
 
-cleanUp('./data/Docs_txt')
-cleanUp('./data/Templates_txt')
+cleanUp('./data/Docs_txt/')
+cleanUp('./data/Templates_txt/')
