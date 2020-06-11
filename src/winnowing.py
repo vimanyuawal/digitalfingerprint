@@ -161,8 +161,7 @@ def saveTemplatesToDatabase(f, db):
     # we can keep a nested loop here because the documents to be checked will be >> our templates in an average case so it makes sense to arrange our data in a { fingerprint : [doc_addresses] }
     for template in os.listdir(template_address):
         fingerprints = f.generate(fpath=template_address+template)
-        for fp in fingerprints:
-            db.add(fp, template_address+template)
+        db.add(fingerprints, template_address+template)
 
 
 def checkSimilarity(fingerprints, db):
@@ -170,15 +169,74 @@ def checkSimilarity(fingerprints, db):
     print(docs)
 
 
+def results(mutual, nonmutual, reciprocal):
+
+    # print('% of documents Reciprocal NDA: ', ((type1/total)*100))
+    # print('% of documents Non mutual NDA: ', ((type2/total)*100))
+    # print('% of documents Mutual NDA: ',
+    #       100*(1 - (type1+type2)/total))
+
+    # print('Accuracy of mutual: ')
+    # sorted()
+
+    # print('Accuracy of nonmutual: ')
+    print('\n \n \n')
+
+    difference = set(reciprocal).difference(
+        set(os.listdir('./data/Reciprocal/')))
+    symmetricdifference = set(reciprocal).symmetric_difference(
+        set(os.listdir('./data/Reciprocal/')))
+    # print(difference, symmetricdifference)
+
+    print('Reciprocal VS Not Reciprocal Classification Matrix')
+    print('Predicted \t Reciprocal (actual) \t Not Reciprocal (actual)')
+    print('Reciprocal \t ' + str(len(set(reciprocal))) +
+          ' \t \t \t ' + str(1))
+    print('Not Reciprocal \t ' +
+          str(len(symmetricdifference)) + ' \t \t \t' + str(121))
+
+
 if __name__ == "__main__":
-    f = Fingerprint(kgram_len=4, window_len=9)
+    window_len = 3
+    kgram_len = 2
+    f = Fingerprint(kgram_len=kgram_len, window_len=window_len)
     db = Database()
     saveTemplatesToDatabase(f, db)
     filepath = './data/Docs_txt/'
-    print(db.printDB())
-    # for file in os.listdir(filepath):
-    #     filefingerprints = f.generate(fpath=filepath+file)
-    #     checkSimilarity(filefingerprints, db)
+    # print(db.printDB())
+    template1 = './data/Templates_txt/Reciprocal NDA.txt'
+    template2 = './data/Templates_txt/Non-Mutual NDA.txt'
+
+    type1 = 0
+    type2 = 0
+
+    reciprocal = []
+    mutual = []
+    nonmutual = []
+
+    total = len(os.listdir(filepath))
+    for file in os.listdir(filepath):
+        p = open(filepath+file, 'r')
+        text = p.read()
+        p.close()
+        if len(text) >= window_len:
+            sample = f.generate(fpath=filepath+file)
+            score = db.getJaccardScore(sample)
+            # print(score[template1], score[template2])
+            if score[template1] > score[template2]:
+                type1 += 1
+                # print('Reciprocal NDA')
+                reciprocal.append(file)
+            elif score[template2] > score[template2]:
+                type2 += 1
+                # print('Non mutual NDA')
+                nonmutual.append(file)
+            else:
+                # print('Mutual NDA')
+                mutual.append(file)
+
+    # db.printDB()
+    results(mutual, nonmutual, reciprocal)
 
 
 # does positioning matter? maybe, maybe not

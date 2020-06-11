@@ -15,11 +15,60 @@ from pdf2image.exceptions import (
     PDFPageCountError,
     PDFSyntaxError
 )
+from cleanup import cleanUp
 
 headers = {
     'X-Tika-PDFextractInlineImages': 'true',
     "X-Tika-OCRLanguage": "eng+nor"
 }
+
+
+def classifyFilesByText(file, text, reciprocalfolder, nonmutualndafolder, unclassified, r, m, n):
+
+    if 'reciprocal' in text:
+        type = open(reciprocalfolder +
+                    file.partition('.')[0]+'.txt', 'w')
+        type.write(text)
+        type.close()
+        r += 1
+
+    elif 'nonmutual' in text:
+        type = open(nonmutualndafolder +
+                    file.partition('.')[0]+'.txt', 'w')
+        type.write(text)
+        type.close()
+        m += 1
+
+    else:
+        type = open(unclassified+file.partition('.')
+                    [0]+'.txt', 'w')
+        type.write(text)
+        type.close()
+        n += 1
+
+
+def classifyFilesByHeadingAndText(file, text, reciprocalfolder, nonmutualndafolder, unclassified, r, m, n):
+
+    if ('nonmutual' in file.lower()) or ('non-mutual' in file.lower()):
+        type = open(nonmutualndafolder +
+                    file.partition('.')[0]+'.txt', 'w')
+        type.write(text)
+        type.close()
+        m += 1
+
+    elif ('reciprocal' in file.lower()) or ('mnda' in file.lower()) or ('reciprocal' in text.lower()) or ('mutual nda' in file.lower()) or ('mutualnda' in text.lower()) or ('mutualconf' in text.lower()) or ('mutualnon' in text.lower()):
+        type = open(reciprocalfolder +
+                    file.partition('.')[0]+'.txt', 'w')
+        type.write(text)
+        type.close()
+        r += 1
+
+    else:
+        type = open(unclassified+file.partition('.')
+                    [0]+'.txt', 'w')
+        type.write(text)
+        type.close()
+        n += 1
 
 
 def createFolders():
@@ -51,6 +100,27 @@ def createFolders():
     else:
         print('The Templates_txt folder already exists.')
 
+    newpath = r'./data/Reciprocal'
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+        print('Reciprocal folder created...')
+    else:
+        print('The Reciprocal folder already exists.')
+
+    newpath = r'./data/NonMutual'
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+        print('NonMutual folder created...')
+    else:
+        print('The NonMutual folder already exists.')
+
+    newpath = r'./data/Unclassified'
+    if not os.path.exists(newpath):
+        os.makedirs(newpath)
+        print('Unclassified folder created...')
+    else:
+        print('The Unclassified folder already exists.')
+
 
 def readFilesToText():
     print('Accessing files from data/Docs...')
@@ -58,7 +128,12 @@ def readFilesToText():
     read_path = './data/Read'
     unread_path = './data/Unreadable'
     save_path = './data/Docs_txt'
-    counter = 0
+    unclassified = './data/Unclassified/'
+    m = 0
+    reciprocalfolder = './data/Reciprocal/'
+    r = 0
+    nonmutualndafolder = './data/NonMutual/'
+    n = 0
     unableToConvert = []
     countpdf = 1
     filenums = len(os.listdir(directory))
@@ -67,21 +142,26 @@ def readFilesToText():
         if(file not in os.listdir(read_path)):
             if('.pdf' in file):
                 countpdf += 1
-            print('Converting file ' + str(counter) + '/'
-                  + str(filenums) + '...')
+
             data = parser.from_file(directory+'/'+file)
             text = data['content']
             if text != None:
-                textFile = open(('./data/Docs_txt/'+str(counter)+'.txt'), 'w')
-                textFile.write(text)
+                text = cleanUp(text)
+                if len(text) > 0:
+                    classifyFilesByText(file, text, reciprocalfolder,
+                                        nonmutualndafolder, unclassified, r, m, n)
+
+                    textFile = open(
+                        ('./data/Docs_txt/'+file.partition('.')[0]+'.txt'), 'w')
+                    textFile.write(text)
+                else:
+                    textFile.close()
+                    continue
                 textFile.close()
                 # moving to read folder
                 shutil.copyfile(directory+'/'+file, read_path+'/'+file)
-                print('Added file.')
-
-                counter += 1
             else:
-                print('Moving ' + file + " to unreadable.")
+                # print('Moving ' + file + " to unreadable.")
 
                 # this means that the data is a scanned image pdf so we can convert
                 #  into an image and use OCR to extract text
@@ -101,31 +181,35 @@ def readFilesToText():
 
     for file in os.listdir(unread_path):
         if '.pdf' in file:
-            print('Picking up file: ' + str(file))
             pdf_path = unread_path+'/'+file
             try:
                 pages = convert_from_path(pdf_path)
                 page_counter = 1
                 for page in pages:
-                    filename = unread_path+'/'+file + \
+                    filename = unread_path+'/'+file.partition('.')[0] + \
                         "_page"+str(page_counter)+'.jpg'
                     page.save(filename, 'JPEG')
                     page_counter += 1
                 totalpages = page_counter-1
-                txtfile = save_path+'/'+str(counter)+'.txt'
-                print('Save file to '+str(txtfile))
+                txtfile = save_path+'/'+file.partition('.')[0]+'.txt'
                 textFile = open(txtfile, 'a')
 
                 for i in range(1, totalpages):
-                    filename = unread_path+'/'+file+"_page"+str(i)+'.jpg'
+                    filename = unread_path+'/' + \
+                        file.partition('.')[0]+"_page"+str(i)+'.jpg'
                     text = str(
                         ((pytesseract.image_to_string(Image.open(filename)))))
-                    textFile.write(text)
+                    text = cleanUp(text)
+                    if len(text) > 0:
+                        classifyFilesByText(file, text, reciprocalfolder,
+                                            nonmutualndafolder, unclassified, r, m, n)
+                        textFile.write(text)
+                    else:
+                        textFile.close()
+                        continue
                 textFile.close()
                 # moving to read folder
                 shutil.move(unread_path+'/'+file, read_path+'/'+file)
-                print('Saved.')
-                counter += 1
             except(ValueError, PDFPageCountError):
                 print('The pdf ' + file + ' could not be read')
 
@@ -135,18 +219,19 @@ def readFilesToText():
 
     template_path = './data/Templates/'
     save_path = './data/Templates_txt/'
-    counter = 1
     for file in os.listdir(template_path):
         data = parser.from_file(template_path+file)
         text = data['content']
         if text != None:
-            textFile = open((save_path+str(counter)+'.txt'), 'w')
-            textFile.write(text)
-            textFile.close()
-            # moving to read folder
-            shutil.copyfile(template_path+file, read_path+'/'+file)
-            print('Added file.')
-            counter += 1
+            if len(text) > 0:
+                text = cleanUp(text)
+                classifyFilesByText(file, text, reciprocalfolder,
+                                    nonmutualndafolder, unclassified, r, m, n)
+
+                textFile = open((save_path+file.partition('.')[0]+'.txt'), 'w')
+                textFile.write(text)
+                # moving to read folder
+                shutil.copyfile(template_path+file, read_path+'/'+file)
 
 
 createFolders()
