@@ -182,37 +182,42 @@ def results(mutual, nonmutual, reciprocal):
     # print('Accuracy of nonmutual: ')
     print('\n \n \n')
 
-    difference = set(reciprocal).difference(
-        set(os.listdir('./data/Reciprocal/')))
-    symmetricdifference = set(reciprocal).symmetric_difference(
-        set(os.listdir('./data/Reciprocal/')))
-    # print(difference, symmetricdifference)
+    predictedReciprocal = set(reciprocal)
+    actualReciprocal = set(os.listdir('./data/Classification/Reciprocal/'))
 
-    print('Reciprocal VS Not Reciprocal Classification Matrix')
-    print('Predicted \t Reciprocal (actual) \t Not Reciprocal (actual)')
-    print('Reciprocal \t ' + str(len(set(reciprocal))) +
-          ' \t \t \t ' + str(1))
-    print('Not Reciprocal \t ' +
-          str(len(symmetricdifference)) + ' \t \t \t' + str(121))
+    truePositive = predictedReciprocal.intersection(actualReciprocal)
+    falsePositive = predictedReciprocal.difference(actualReciprocal)
+    trueNegative = set()
+    falseNegative = actualReciprocal.difference(predictedReciprocal)
+
+    print('\t \t \t \t Reciprocal (actual) \t \t Not Reciprocal (actual)')
+    print('Reciprocal (predicted) \t \t \t' + str(len(truePositive)) +
+          ' \t \t \t \t' + str(len(falsePositive)))
+    print('NonReciprocal (predicted) \t \t' +
+          str(len(falseNegative)) + ' \t \t \t \t' + str(len(trueNegative))+'\n \n')
+
+    print('\n\n The files that we thought were reciprocal but were not in actuality: ' + str(falsePositive))
+    print('\n\n The files that we thought were non-reciprocal but were reciprocal in actuality: ' + str(falseNegative))
 
 
 if __name__ == "__main__":
-    window_len = 3
-    kgram_len = 2
+    window_len = 2
+    kgram_len = 1
     f = Fingerprint(kgram_len=kgram_len, window_len=window_len)
     db = Database()
     saveTemplatesToDatabase(f, db)
     filepath = './data/Docs_txt/'
     # print(db.printDB())
-    template1 = './data/Templates_txt/Reciprocal NDA.txt'
+    template1a = './data/Templates_txt/Reciprocal NDA.txt'
+    template1b = './data/Templates_txt/Mutual NDA.txt'
     template2 = './data/Templates_txt/Non-Mutual NDA.txt'
 
     type1 = 0
     type2 = 0
 
     reciprocal = []
-    mutual = []
     nonmutual = []
+    unclassified = []
 
     total = len(os.listdir(filepath))
     for file in os.listdir(filepath):
@@ -223,20 +228,20 @@ if __name__ == "__main__":
             sample = f.generate(fpath=filepath+file)
             score = db.getJaccardScore(sample)
             # print(score[template1], score[template2])
-            if score[template1] > score[template2]:
+            if score[template1a] > score[template2] or score[template1b] > score[template2]:
                 type1 += 1
                 # print('Reciprocal NDA')
                 reciprocal.append(file)
-            elif score[template2] > score[template2]:
+            elif score[template2] > score[template1a] and score[template2] > score[template1b]:
                 type2 += 1
                 # print('Non mutual NDA')
                 nonmutual.append(file)
             else:
                 # print('Mutual NDA')
-                mutual.append(file)
+                unclassified.append(file)
 
     # db.printDB()
-    results(mutual, nonmutual, reciprocal)
+    results(unclassified, nonmutual, reciprocal)
 
 
 # does positioning matter? maybe, maybe not

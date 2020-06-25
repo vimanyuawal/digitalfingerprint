@@ -15,6 +15,7 @@ from pdf2image.exceptions import (
     PDFPageCountError,
     PDFSyntaxError
 )
+import random
 from cleanup import cleanUp
 
 headers = {
@@ -23,52 +24,52 @@ headers = {
 }
 
 
-def classifyFilesByText(file, text, reciprocalfolder, nonmutualndafolder, unclassified, r, m, n):
+# def classifyFilesByText(file, text, reciprocalfolder, nonmutualndafolder, unclassified, r, m, n):
 
-    if 'reciprocal' in text:
-        type = open(reciprocalfolder +
-                    file.partition('.')[0]+'.txt', 'w')
-        type.write(text)
-        type.close()
-        r += 1
+#     if 'reciprocal' in text:
+#         type = open(reciprocalfolder +
+#                     file.partition('.')[0]+'.txt', 'w')
+#         type.write(text)
+#         type.close()
+#         r += 1
 
-    elif 'nonmutual' in text:
-        type = open(nonmutualndafolder +
-                    file.partition('.')[0]+'.txt', 'w')
-        type.write(text)
-        type.close()
-        m += 1
+#     elif 'nonmutual' in text:
+#         type = open(nonmutualndafolder +
+#                     file.partition('.')[0]+'.txt', 'w')
+#         type.write(text)
+#         type.close()
+#         m += 1
 
-    else:
-        type = open(unclassified+file.partition('.')
-                    [0]+'.txt', 'w')
-        type.write(text)
-        type.close()
-        n += 1
+#     else:
+#         type = open(unclassified+file.partition('.')
+#                     [0]+'.txt', 'w')
+#         type.write(text)
+#         type.close()
+#         n += 1
 
 
-def classifyFilesByHeadingAndText(file, text, reciprocalfolder, nonmutualndafolder, unclassified, r, m, n):
+# def classifyFilesByHeadingAndText(file, text, reciprocalfolder, nonmutualndafolder, unclassified, r, m, n):
 
-    if ('nonmutual' in file.lower()) or ('non-mutual' in file.lower()):
-        type = open(nonmutualndafolder +
-                    file.partition('.')[0]+'.txt', 'w')
-        type.write(text)
-        type.close()
-        m += 1
+#     if ('nonmutual' in file.lower()) or ('non-mutual' in file.lower()):
+#         type = open(nonmutualndafolder +
+#                     file.partition('.')[0]+'.txt', 'w')
+#         type.write(text)
+#         type.close()
+#         m += 1
 
-    elif ('reciprocal' in file.lower()) or ('mnda' in file.lower()) or ('reciprocal' in text.lower()) or ('mutual nda' in file.lower()) or ('mutualnda' in text.lower()) or ('mutualconf' in text.lower()) or ('mutualnon' in text.lower()):
-        type = open(reciprocalfolder +
-                    file.partition('.')[0]+'.txt', 'w')
-        type.write(text)
-        type.close()
-        r += 1
+#     elif ('reciprocal' in file.lower()) or ('mnda' in file.lower()) or ('reciprocal' in text.lower()) or ('mutual nda' in file.lower()) or ('mutualnda' in text.lower()) or ('mutualconf' in text.lower()) or ('mutualnon' in text.lower()):
+#         type = open(reciprocalfolder +
+#                     file.partition('.')[0]+'.txt', 'w')
+#         type.write(text)
+#         type.close()
+#         r += 1
 
-    else:
-        type = open(unclassified+file.partition('.')
-                    [0]+'.txt', 'w')
-        type.write(text)
-        type.close()
-        n += 1
+#     else:
+#         type = open(unclassified+file.partition('.')
+#                     [0]+'.txt', 'w')
+#         type.write(text)
+#         type.close()
+#         n += 1
 
 
 def createFolders():
@@ -100,26 +101,26 @@ def createFolders():
     else:
         print('The Templates_txt folder already exists.')
 
-    newpath = r'./data/Reciprocal'
-    if not os.path.exists(newpath):
-        os.makedirs(newpath)
-        print('Reciprocal folder created...')
-    else:
-        print('The Reciprocal folder already exists.')
+    # newpath = r'./data/Reciprocal'
+    # if not os.path.exists(newpath):
+    #     os.makedirs(newpath)
+    #     print('Reciprocal folder created...')
+    # else:
+    #     print('The Reciprocal folder already exists.')
 
-    newpath = r'./data/NonMutual'
-    if not os.path.exists(newpath):
-        os.makedirs(newpath)
-        print('NonMutual folder created...')
-    else:
-        print('The NonMutual folder already exists.')
+    # newpath = r'./data/NonMutual'
+    # if not os.path.exists(newpath):
+    #     os.makedirs(newpath)
+    #     print('NonMutual folder created...')
+    # else:
+    #     print('The NonMutual folder already exists.')
 
-    newpath = r'./data/Unclassified'
-    if not os.path.exists(newpath):
-        os.makedirs(newpath)
-        print('Unclassified folder created...')
-    else:
-        print('The Unclassified folder already exists.')
+    # newpath = r'./data/Unclassified'
+    # if not os.path.exists(newpath):
+    #     os.makedirs(newpath)
+    #     print('Unclassified folder created...')
+    # else:
+    #     print('The Unclassified folder already exists.')
 
 
 def readFilesToText():
@@ -128,16 +129,8 @@ def readFilesToText():
     read_path = './data/Read'
     unread_path = './data/Unreadable'
     save_path = './data/Docs_txt'
-    unclassified = './data/Unclassified/'
-    m = 0
-    reciprocalfolder = './data/Reciprocal/'
-    r = 0
-    nonmutualndafolder = './data/NonMutual/'
-    n = 0
     unableToConvert = []
     countpdf = 1
-    filenums = len(os.listdir(directory))
-
     for file in os.listdir(directory):
         if(file not in os.listdir(read_path)):
             if('.pdf' in file):
@@ -148,8 +141,8 @@ def readFilesToText():
             if text != None:
                 text = cleanUp(text)
                 if len(text) > 0:
-                    classifyFilesByText(file, text, reciprocalfolder,
-                                        nonmutualndafolder, unclassified, r, m, n)
+                    # classifyFilesByText(file, text, reciprocalfolder,
+                    #                     nonmutualndafolder, unclassified, r, m, n)
 
                     textFile = open(
                         ('./data/Docs_txt/'+file.partition('.')[0]+'.txt'), 'w')
@@ -201,8 +194,8 @@ def readFilesToText():
                         ((pytesseract.image_to_string(Image.open(filename)))))
                     text = cleanUp(text)
                     if len(text) > 0:
-                        classifyFilesByText(file, text, reciprocalfolder,
-                                            nonmutualndafolder, unclassified, r, m, n)
+                        # classifyFilesByText(file, text, reciprocalfolder,
+                        #                     nonmutualndafolder, unclassified, r, m, n)
                         textFile.write(text)
                     else:
                         textFile.close()
@@ -225,8 +218,8 @@ def readFilesToText():
         if text != None:
             if len(text) > 0:
                 text = cleanUp(text)
-                classifyFilesByText(file, text, reciprocalfolder,
-                                    nonmutualndafolder, unclassified, r, m, n)
+                # classifyFilesByText(file, text, reciprocalfolder,
+                #                     nonmutualndafolder, unclassified, r, m, n)
 
                 textFile = open((save_path+file.partition('.')[0]+'.txt'), 'w')
                 textFile.write(text)
@@ -234,5 +227,30 @@ def readFilesToText():
                 shutil.copyfile(template_path+file, read_path+'/'+file)
 
 
+def pdfSetUp():
+    path = './data/Docs_txt/'
+
+    def readData():
+        data = parser.from_file(
+            './data/Templates/f1099msc.pdf')
+        text = data['content']
+        if text != None:
+            return text
+        else:
+            return ''
+
+    def createSamples(text, n=1):
+        for i in range(0, n):
+            file = open(path+'sample'+str(i)+'.txt', 'w+')
+            amt = random.randint(1, 5000)
+            text = text.replace('$', '$'+str(amt))
+            text = cleanUp(text)
+            file.write(text)
+
+    text = readData()
+    createSamples(text, n=5)
+
+
 createFolders()
 readFilesToText()
+pdfSetUp()

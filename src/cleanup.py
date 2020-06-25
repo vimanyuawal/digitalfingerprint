@@ -9,7 +9,9 @@ import re
 def cleanUp(text):
 
     text = ''.join(e for e in text if e.isalnum())
+    text = text.strip('Reciprocal NDA')
     text = text.lower()
+    text = text.strip()
     text = text.strip('\x00')
     text = text.replace('\x00', '')
     return text
