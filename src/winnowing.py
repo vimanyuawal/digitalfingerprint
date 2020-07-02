@@ -4,6 +4,7 @@ import sys
 from collections import defaultdict
 import os
 from database import Database
+import shutil
 
 
 __all__ = [
@@ -199,6 +200,38 @@ def results(mutual, nonmutual, reciprocal):
     print('\n\n The files that we thought were reciprocal but were not in actuality: ' + str(falsePositive))
     print('\n\n The files that we thought were non-reciprocal but were reciprocal in actuality: ' + str(falseNegative))
 
+    print('\n \n \n')
+
+    predictedReciprocal = set(reciprocal)
+    actualReciprocal = set(os.listdir('./data/Classification/Reciprocal/'))
+
+    truePositive = predictedReciprocal.intersection(actualReciprocal)
+    falsePositive = predictedReciprocal.difference(actualReciprocal)
+    trueNegative = set()
+    falseNegative = actualReciprocal.difference(predictedReciprocal)
+
+    print('\t \t \t \t Reciprocal (actual) \t \t Not Reciprocal (actual)')
+    print('Reciprocal (predicted) \t \t \t' + str(len(truePositive)) +
+          ' \t \t \t \t' + str(len(falsePositive)))
+    print('NonReciprocal (predicted) \t \t' +
+          str(len(falseNegative)) + ' \t \t \t \t' + str(len(trueNegative))+'\n \n')
+
+    print('\n\n The files that we thought were reciprocal but were not in actuality: ' + str(falsePositive))
+    print('\n\n The files that we thought were non-reciprocal but were reciprocal in actuality: ' + str(falseNegative))
+
+    # Now we can move the false negatives to another folder and see if they match the template
+    path = './data/Mismatches/'
+    os.mkdir(path)
+    path = './data/Mismatches/DontMatchReciprocalTemplate/'
+    os.mkdir(path)
+    findfrom = './data/Docs/'
+
+    for filename in falseNegative:
+        edited = filename.partition('.')[0]
+        for match in os.listdir(findfrom):
+            if edited == match.partition('.')[0]:
+                shutil.copy(findfrom+match, path+match)
+
 
 if __name__ == "__main__":
     window_len = 2
@@ -207,10 +240,13 @@ if __name__ == "__main__":
     db = Database()
     saveTemplatesToDatabase(f, db)
     filepath = './data/Docs_txt/'
+
     # print(db.printDB())
     template1a = './data/Templates_txt/Reciprocal NDA.txt'
-    template1b = './data/Templates_txt/Mutual NDA.txt'
+    # template1b = './data/Templates_txt/Mutual NDA.txt'
+    # template1c = './data/Templates_txt/CDA.txt'
     template2 = './data/Templates_txt/Non-Mutual NDA.txt'
+    template3 = './data/Templates_txt/f1099msc.txt'
 
     type1 = 0
     type2 = 0
@@ -228,11 +264,11 @@ if __name__ == "__main__":
             sample = f.generate(fpath=filepath+file)
             score = db.getJaccardScore(sample)
             # print(score[template1], score[template2])
-            if score[template1a] > score[template2] or score[template1b] > score[template2]:
+            if score[template1a] > score[template2]:
                 type1 += 1
                 # print('Reciprocal NDA')
                 reciprocal.append(file)
-            elif score[template2] > score[template1a] and score[template2] > score[template1b]:
+            elif score[template2] > score[template1a]:
                 type2 += 1
                 # print('Non mutual NDA')
                 nonmutual.append(file)
@@ -240,8 +276,5 @@ if __name__ == "__main__":
                 # print('Mutual NDA')
                 unclassified.append(file)
 
-    # db.printDB()
+        # db.printDB()
     results(unclassified, nonmutual, reciprocal)
-
-
-# does positioning matter? maybe, maybe not

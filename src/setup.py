@@ -227,30 +227,30 @@ def readFilesToText():
                 shutil.copyfile(template_path+file, read_path+'/'+file)
 
 
-def pdfSetUp():
-    path = './data/Docs_txt/'
+# def pdfSetUp():
+#     path = './data/Docs_txt/'
 
-    def readData():
-        data = parser.from_file(
-            './data/Templates/f1099msc.pdf')
-        text = data['content']
-        if text != None:
-            return text
-        else:
-            return ''
+#     def readData():
+#         data = parser.from_file(
+#             './data/Templates/f1099msc.pdf')
+#         text = data['content']
+#         if text != None:
+#             return text
+#         else:
+#             return ''
 
-    def createSamples(text, n=1):
-        for i in range(0, n):
-            file = open(path+'sample'+str(i)+'.txt', 'w+')
-            amt = random.randint(1, 5000)
-            text = text.replace('$', '$'+str(amt))
-            text = cleanUp(text)
-            file.write(text)
+#     def createSamples(text, n=1):
+#         for i in range(0, n):
+#             file = open(path+'sample'+str(i)+'.txt', 'w+')
+#             amt = random.randint(1, 5000)
+#             text = text.replace('$', '$'+str(amt))
+#             text = cleanUp(text)
+#             file.write(text)
 
-    text = readData()
-    createSamples(text, n=5)
+#     text = readData()
+#     createSamples(text, n=5)
 
 
 createFolders()
 readFilesToText()
-pdfSetUp()
+# pdfSetUp()

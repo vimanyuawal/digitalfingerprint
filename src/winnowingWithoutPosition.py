@@ -226,6 +226,7 @@ if __name__ == "__main__":
     db = Database()
     saveTemplatesToDatabase(f, db)
     filepath = './data/Docs_txt/'
+
     # print(db.printDB())
     template1a = './data/Templates_txt/Reciprocal NDA.txt'
     template1b = './data/Templates_txt/Mutual NDA.txt'
@@ -248,23 +249,21 @@ if __name__ == "__main__":
         if len(text) >= window_len:
             sample = f.generate(fpath=filepath+file)
             score = db.getJaccardScore(sample)
-            if score[template3] > 0:
-                print(file + " is 1099 form.")
-            # # print(score[template1], score[template2])
-            # if score[template1a] > score[template2] or score[template1b] > score[template2] or score[template1c] > score[template2]:
-            #     type1 += 1
-            #     # print('Reciprocal NDA')
-            #     reciprocal.append(file)
-            # elif score[template2] > score[template1a] and score[template2] > score[template1b] and score[template2] > score[template1c]:
-            #     type2 += 1
-            #     # print('Non mutual NDA')
-            #     nonmutual.append(file)
-            # else:
-            #     # print('Mutual NDA')
-            #     unclassified.append(file)
+            # print(score[template1], score[template2])
+            if score[template1a] > score[template2] or score[template1b] > score[template2] or score[template1c] > score[template2]:
+                type1 += 1
+                # print('Reciprocal NDA')
+                reciprocal.append(file)
+            elif score[template2] > score[template1a] and score[template2] > score[template1b] and score[template2] > score[template1c]:
+                type2 += 1
+                # print('Non mutual NDA')
+                nonmutual.append(file)
+            else:
+                # print('Mutual NDA')
+                unclassified.append(file)
 
     # db.printDB()
-    # results(unclassified, nonmutual, reciprocal)
+    results(unclassified, nonmutual, reciprocal)
 
 
 # does positioning matter? maybe, maybe not
